@@ -195,11 +195,9 @@ const app = {
         playBtn.addEventListener('click', displayTogglePause);
         playBtn.addEventListener('click', displayProgressSong);
 
-
-        progress.addEventListener('mousedown', setIsTimeUpdate);//khi nhấn chuột vào thanh tua, sẽ dừng sự kiện trong displayProgressSong
+        //xử lý sự kiện tua bài hát
+        progress.addEventListener('mousedown', setIsTimeUpdate);
         progress.addEventListener('change', seekSong);
-
-
 
     },
     loadCurrentSong: function () {
