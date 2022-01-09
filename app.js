@@ -16,6 +16,9 @@ const $$ = document.querySelectorAll.bind(document);
 //lấy ra thẻ div show ra cái hình cd
 const cd = $('.cd');
 
+//lấy ra chiều cao của thẻ div (do chiều cao bằng với chiều rộng)
+const cdWidth = cd.offsetWidth;
+
 const heading = $('header h2');//thẻ show ra cái tên bài hát
 const cdThumb = $('.cd-thumb'); //thẻ show ra cái hình trên cd
 const audio = $('#audio');//thẻ audio
@@ -29,6 +32,7 @@ const progress = $('#progress');
 const app = {
     currentIndex: 0,
     isPlaying: false,
+    isTimeUpdate: false,
     songs: [
         {
             name: 'Nắng Đêm',
@@ -118,12 +122,8 @@ const app = {
         $('.playlist').innerHTML = htmls.join('');
     },
     handleEvents: function () {
-        //lấy ra chiều cao của thẻ div (do chiều cao bằng với chiều rộng)
-        const cdWidth = cd.offsetWidth;
 
-        //xử lý sự kiện phóng to thu nhỏ hình cd
-        document.onscroll = function () {
-
+        const displayCd = function () {
             //lấy vị trí của thẻ div chứa các bài hát khi mà người dùng scroll
             //một số trình duyệt không hỗ trợ window.scrollY
             //check coi 1 trong 2 cái nào có thì dùng
@@ -141,34 +141,65 @@ const app = {
             cd.style.opacity = (newCdWidth / cdWidth);
         }
 
-        //xử lý sự kiện click play hoặc pause 
-        playBtn.onclick = function () {
-
+        const playOrPause = function () {
             if (app.isPlaying) {
                 audio.pause();
             } else {
                 audio.play();
             }
+        }
 
+        const displayTogglePlay = function () {
             //khi đang có sự kiện play
             audio.onplay = function () {
                 player.classList.add('playing');
                 app.isPlaying = true;
             }
+        }
 
+        const displayTogglePause = function () {
             //khi đang có sự kiện pause
             audio.onpause = function () {
                 player.classList.remove('playing');
                 app.isPlaying = false;
             }
+        }
 
+        const displayProgressSong = function () {
             audio.ontimeupdate = function () {
-                if (audio.currentTime) {
-                    const progressPercent = Math.floor(audio.currentTime / audio.duration * 100);
-                    progress.value = progressPercent;
+                if (!app.isTimeUpdate) {
+                    if (audio.currentTime) {
+                        const progressPercent = Math.floor(audio.currentTime / audio.duration * 100);
+                        progress.value = progressPercent;
+                    }
                 }
             }
         }
+
+        const setIsTimeUpdate = function () {
+            app.isTimeUpdate = true;
+        }
+
+        const seekSong = function () {
+            const seekTime = progress.value * audio.duration / 100;
+            audio.currentTime = seekTime;
+            app.isTimeUpdate = false;
+        }
+
+        //xử lý sự kiện phóng to thu nhỏ hình cd
+        document.addEventListener('scroll', displayCd);
+
+        //xử lý sự kiện click play hoặc pause 
+        playBtn.addEventListener('click', playOrPause);
+        playBtn.addEventListener('click', displayTogglePlay);
+        playBtn.addEventListener('click', displayTogglePause);
+        playBtn.addEventListener('click', displayProgressSong);
+
+
+        progress.addEventListener('mousedown', setIsTimeUpdate);//khi nhấn chuột vào thanh tua, sẽ dừng sự kiện trong displayProgressSong
+        progress.addEventListener('change', seekSong);
+
+
 
     },
     loadCurrentSong: function () {
