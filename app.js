@@ -28,6 +28,8 @@ const player = $('.player');// hiển thị play hoặc pause
 
 const progress = $('#progress');
 
+const btnNext = $('.btn-next');//button next song
+const btnPrev = $('.btn-prev');//button prev song
 
 const app = {
     currentIndex: 0,
@@ -160,22 +162,18 @@ const app = {
             }
         }
 
-        const displayTogglePlay = function () {
-            //khi đang có sự kiện play
-            audio.onplay = function () {
-                player.classList.add('playing');
-                app.isPlaying = true;
-                cdThumbAnimate.play();//xoay cd thumb
-            }
+        //khi đang có sự kiện play
+        audio.onplay = function () {
+            player.classList.add('playing');
+            app.isPlaying = true;
+            cdThumbAnimate.play();//xoay cd thumb
         }
 
-        const displayTogglePause = function () {
-            //khi đang có sự kiện pause
-            audio.onpause = function () {
-                player.classList.remove('playing');
-                app.isPlaying = false;
-                cdThumbAnimate.pause();//dừng xoay cd thumb
-            }
+        //khi đang có sự kiện pause
+        audio.onpause = function () {
+            player.classList.remove('playing');
+            app.isPlaying = false;
+            cdThumbAnimate.pause();//dừng xoay cd thumb
         }
 
         const displayProgressSong = function () {
@@ -197,15 +195,43 @@ const app = {
         document.addEventListener('scroll', displayCd);
 
         //xử lý sự kiện click play hoặc pause 
-        playBtn.addEventListener('click', playOrPause);
-        playBtn.addEventListener('click', displayTogglePlay);
-        playBtn.addEventListener('click', displayTogglePause);
-        playBtn.addEventListener('click', displayProgressSong);
-
+        {
+            playBtn.addEventListener('click', playOrPause);
+            playBtn.addEventListener('click', displayProgressSong);
+        }
+        
         //xử lý sự kiện tua bài hát        
         progress.addEventListener('input', seekSong);
 
+        //xử lý sự kiện next  song
+        {
+            btnNext.addEventListener('click', app.nextSong);
+            btnNext.addEventListener('click', () => { audio.play() });
+        }
+
+        //xử lý sự kiện prev  song
+        {
+            btnPrev.addEventListener('click', app.prevSong);
+            btnPrev.addEventListener('click', () => { audio.play() });
+        }
     },
+
+    nextSong: function () {
+        app.currentIndex++;
+        if (app.currentIndex >= app.songs.length) {
+            app.currentIndex = 0;
+        }
+        app.loadCurrentSong();
+    },
+
+    prevSong: function () {
+        app.currentIndex--;
+        if (app.currentIndex < 0) {
+            app.currentIndex = (app.songs.length - 1);
+        }
+        app.loadCurrentSong();
+    },
+
     loadCurrentSong: function () {
 
         heading.textContent = this.currentSong.name;
@@ -213,6 +239,7 @@ const app = {
         audio.src = this.currentSong.path;
 
     },
+
     start: function () {
         //định nghĩa các thuộc tính cho object
         this.defineProperties();
