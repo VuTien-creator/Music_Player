@@ -32,7 +32,6 @@ const progress = $('#progress');
 const app = {
     currentIndex: 0,
     isPlaying: false,
-    isTimeUpdate: false,
     songs: [
         {
             name: 'Nắng Đêm',
@@ -167,23 +166,17 @@ const app = {
 
         const displayProgressSong = function () {
             audio.ontimeupdate = function () {
-                if (!app.isTimeUpdate) {
-                    if (audio.currentTime) {
-                        const progressPercent = Math.floor(audio.currentTime / audio.duration * 100);
-                        progress.value = progressPercent;
-                    }
+                if (audio.currentTime) {
+                    const progressPercent = Math.floor(audio.currentTime / audio.duration * 100);
+                    progress.value = progressPercent;
                 }
             }
         }
 
-        const setIsTimeUpdate = function () {
-            app.isTimeUpdate = true;
-        }
 
         const seekSong = function () {
             const seekTime = progress.value * audio.duration / 100;
             audio.currentTime = seekTime;
-            app.isTimeUpdate = false;
         }
 
         //xử lý sự kiện phóng to thu nhỏ hình cd
@@ -195,9 +188,8 @@ const app = {
         playBtn.addEventListener('click', displayTogglePause);
         playBtn.addEventListener('click', displayProgressSong);
 
-        //xử lý sự kiện tua bài hát
-        progress.addEventListener('mousedown', setIsTimeUpdate);
-        progress.addEventListener('change', seekSong);
+        //xử lý sự kiện tua bài hát        
+        progress.addEventListener('input', seekSong);
 
     },
     loadCurrentSong: function () {
