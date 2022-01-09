@@ -13,7 +13,21 @@
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
 
+//lấy ra thẻ div show ra cái hình cd
+const cd = $('.cd');
+
+const heading = $('header h2');//thẻ show ra cái tên bài hát
+const cdThumb = $('.cd-thumb'); //thẻ show ra cái hình trên cd
+const audio = $('#audio');//thẻ audio
+
+const playBtn = $('.btn-toggle-play');//button play hoặc pause
+const player = $('.player');// hiển thị play hoặc pause
+
+
+
 const app = {
+    currentIndex: 0,
+    isPlaying: false,
     songs: [
         {
             name: 'Nắng Đêm',
@@ -70,6 +84,19 @@ const app = {
             image: './asset/img/yeu_5.jpg',
         },
     ],
+    /**
+     * tạo ra 1 thằng thuộc tính mới 
+     */
+    defineProperties: function () {
+
+        //tạo ra thuộc tính currentSong với value là function get()
+        Object.defineProperty(this, 'currentSong', {
+            //function get này sẽ trả về bài hát hiện tại đang phát, mặc định là bài đầu
+            get: function () {
+                return this.songs[this.currentIndex];
+            }
+        })
+    },
     render: function () {
         const htmls = this.songs.map((song) => {
             return `
@@ -90,11 +117,10 @@ const app = {
         $('.playlist').innerHTML = htmls.join('');
     },
     handleEvents: function () {
-        //lấy ra thẻ div show ra cái hình cd
-        const cd = $('.cd');
         //lấy ra chiều cao của thẻ div (do chiều cao bằng với chiều rộng)
         const cdWidth = cd.offsetWidth;
 
+        //xử lý sự kiện phóng to thu nhỏ hình cd
         document.onscroll = function () {
 
             //lấy vị trí của thẻ div chứa các bài hát khi mà người dùng scroll
@@ -113,9 +139,48 @@ const app = {
             //opacity chạy từ 0 đến 1, và mờ dần theo tỉ lệ kích thước
             cd.style.opacity = (newCdWidth / cdWidth);
         }
+
+        //xử lý sự kiện click play hoặc pause 
+        playBtn.onclick = function () {
+
+            if (app.isPlaying) {
+                audio.pause();
+            } else {
+                audio.play();
+            }
+
+            //khi đang có sự kiện play
+            audio.onplay = function () {
+                player.classList.add('playing');
+                app.isPlaying = true;
+            }
+
+            //khi đang có sự kiện pause
+            audio.onpause = function () {
+                player.classList.remove('playing');
+                app.isPlaying = false;
+            }
+        }
+
+    },
+    loadCurrentSong: function () {
+
+        heading.textContent = this.currentSong.name;
+        cdThumb.style.backgroundImage = `url(${this.currentSong.image})`;;
+        audio.src = this.currentSong.path;
+
     },
     start: function () {
+        //định nghĩa các thuộc tính cho object
+        this.defineProperties();
+
+        //lắng nghe vào xử lý sự kiện (dom events)
         this.handleEvents();
+
+        //load thông tin bài hát vào UI khi chạy
+        this.loadCurrentSong();
+
+        //render playlist
         this.render();
     },
 }
