@@ -23,6 +23,7 @@ const audio = $('#audio');//thẻ audio
 const playBtn = $('.btn-toggle-play');//button play hoặc pause
 const player = $('.player');// hiển thị play hoặc pause
 
+const progress = $('#progress');
 
 
 const app = {
@@ -159,6 +160,13 @@ const app = {
             audio.onpause = function () {
                 player.classList.remove('playing');
                 app.isPlaying = false;
+            }
+
+            audio.ontimeupdate = function () {
+                if (audio.currentTime) {
+                    const progressPercent = Math.floor(audio.currentTime / audio.duration * 100);
+                    progress.value = progressPercent;
+                }
             }
         }
 
