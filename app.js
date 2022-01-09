@@ -140,6 +140,18 @@ const app = {
             cd.style.opacity = (newCdWidth / cdWidth);
         }
 
+        //xử lý xoay hình cdThumb
+
+        // cdThumbAnimate đối tượng animate API
+        const cdThumbAnimate = cdThumb.animate([{
+            transform: 'rotate(360deg)'
+        }], {
+            duration: 8000,
+            iterations: Infinity
+        });
+
+        cdThumbAnimate.pause(); //mặc định khi vừa vào sẽ không phát nhạc nên không xoay cdThumb
+
         const playOrPause = function () {
             if (app.isPlaying) {
                 audio.pause();
@@ -153,6 +165,7 @@ const app = {
             audio.onplay = function () {
                 player.classList.add('playing');
                 app.isPlaying = true;
+                cdThumbAnimate.play();//xoay cd thumb
             }
         }
 
@@ -161,6 +174,7 @@ const app = {
             audio.onpause = function () {
                 player.classList.remove('playing');
                 app.isPlaying = false;
+                cdThumbAnimate.pause();//dừng xoay cd thumb
             }
         }
 
