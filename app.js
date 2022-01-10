@@ -245,6 +245,12 @@ const app = {
                 }
             });
         }
+
+        //xử lý audio
+        {
+            //khi mới vào người dùng không bấm nút play nhạc mà bấm next/prev thì thanh progress cũng phải thay đổi
+            audio.addEventListener('playing',displayProgressSong)            
+        }
     },
 
     nextSong: function () {
