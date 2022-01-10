@@ -269,7 +269,7 @@ const app = {
 
             audio.addEventListener('play', playAudio)
             audio.addEventListener('pause', pauseAudio)
-            audio.addEventListener('pause', repeatAudio)
+            audio.addEventListener('ended', repeatAudio)
 
         }
 
