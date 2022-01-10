@@ -114,9 +114,9 @@ const app = {
         })
     },
     render: function () {
-        const htmls = this.songs.map((song) => {
+        const htmls = this.songs.map((song, index) => {
             return `
-            <div class="song">
+            <div id="song_${index}" class="song ${index === this.currentIndex ? 'active' : ''}">
                 <div class="thumb"
                     style="background-image: url('${song.image}')">
                 </div>
@@ -131,6 +131,10 @@ const app = {
         });
 
         $('.playlist').innerHTML = htmls.join('');
+    },
+    activeElementSong: function (index) {
+        $('.song.active').classList.remove('active');
+        $(`#song_${index}`).classList.add('active');
     },
     handleEvents: function () {
 
@@ -294,6 +298,13 @@ const app = {
         if (app.currentIndex >= app.songs.length) {
             app.currentIndex = 0;
         }
+
+        if(app.isRandom){
+            app.activeElementSong(app.randomSongs[app.currentIndex])
+        }else{
+            app.activeElementSong(app.currentIndex);
+        }
+
         app.loadCurrentSong();
     },
 
@@ -301,6 +312,12 @@ const app = {
         app.currentIndex--;
         if (app.currentIndex < 0) {
             app.currentIndex = (app.songs.length - 1);
+        }
+
+        if(app.isRandom){
+            app.activeElementSong(app.randomSongs[app.currentIndex])
+        }else{
+            app.activeElementSong(app.currentIndex);
         }
         app.loadCurrentSong();
     },
