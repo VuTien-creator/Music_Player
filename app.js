@@ -31,9 +31,13 @@ const progress = $('#progress');
 const btnNext = $('.btn-next');//button next song
 const btnPrev = $('.btn-prev');//button prev song
 
+const randomBtn = $('.btn-random'); //button random
+
 const app = {
     currentIndex: 0,
     isPlaying: false,
+    isRandom: false,
+    randomSongs: [],
     songs: [
         {
             name: 'Nắng Đêm',
@@ -99,6 +103,9 @@ const app = {
         Object.defineProperty(this, 'currentSong', {
             //function get này sẽ trả về bài hát hiện tại đang phát, mặc định là bài đầu
             get: function () {
+                if (this.isRandom) {
+                    return this.songs[this.randomSongs[this.currentIndex]];
+                }
                 return this.songs[this.currentIndex];
             }
         })
@@ -191,6 +198,14 @@ const app = {
             audio.currentTime = seekTime;
         }
 
+        //xử lý hành động click nút random
+        const random = function () {
+            //gán giá trị lại cho  isRandom
+            app.isRandom = !app.isRandom;
+            //nếu isRandom = true thì add class active, ngược lại thì remove class active
+            randomBtn.classList.toggle('active', app.isRandom);
+        }
+
         //xử lý sự kiện phóng to thu nhỏ hình cd
         document.addEventListener('scroll', displayCd);
 
@@ -199,7 +214,6 @@ const app = {
             playBtn.addEventListener('click', playOrPause);
             playBtn.addEventListener('click', displayProgressSong);
         }
-        
         //xử lý sự kiện tua bài hát        
         progress.addEventListener('input', seekSong);
 
@@ -212,7 +226,24 @@ const app = {
         //xử lý sự kiện prev  song
         {
             btnPrev.addEventListener('click', app.prevSong);
+
             btnPrev.addEventListener('click', () => { audio.play() });
+        }
+
+        //xử lý sự kiện click nút random
+        {
+            randomBtn.addEventListener('click', random);
+
+            //nếu người dùng bật random thì làm mới lại danh sách random
+            randomBtn.addEventListener('click', () => {
+                if (app.isRandom) {
+                    //gán lại mảng randomSongs khi người dùng click random để tạo 1 list random mới
+                    app.setPlayListRanDom();
+                } else {
+                    //khi tắt random thì gán lại currentIndex bằng với giá trị index thực của bài hát đang hát bên trong app.songs
+                    app.currentIndex = app.randomSongs[app.currentIndex];
+                }
+            });
         }
     },
 
@@ -239,7 +270,29 @@ const app = {
         audio.src = this.currentSong.path;
 
     },
+    setPlayListRanDom: function () {
 
+        //lấy ra 1 mảng chứa index bài hát nằm trong app.songs nhưng bỏ đi phần tử đang phát
+        app.randomSongs = app.songs.map((song, index) => {
+            if (index !== app.currentIndex) {
+                return index;
+            }
+        })
+
+        // random các index 1 cách ngẫu nhiên
+        app.randomSongs.sort((a, b) => (0.5 - Math.random()));
+
+        //trong mảng randomSongs có 1 phần tử undifine là phần tử có index = currentIndex
+        //sau khi sắp xếp random thì phần tử đó nằm cuối cùng nên phải bỏ phần tử đó đi
+        app.randomSongs.pop();
+
+        //thêm vào mảng randomSongs index đã bỏ qua khi map đúng bằng với vị trí là currentIndex 
+        //do khi tăng hay giảm currentIndex để load nhạc thì nó sẽ không có hiện tượng trùng lặp bài hát, các bài hát chỉ phát đúng 1 lần
+        app.randomSongs.splice(app.currentIndex, 0, app.currentIndex);
+
+        // console.log(app.randomSongs, app.currentIndex);
+
+    },
     start: function () {
         //định nghĩa các thuộc tính cho object
         this.defineProperties();
