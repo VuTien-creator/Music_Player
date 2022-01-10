@@ -186,6 +186,13 @@ const app = {
             cdThumbAnimate.pause();//dừng xoay cd thumb
         }
 
+        const repeatAudio = function () {
+            if (!app.isRepeat) {
+                app.nextSong();
+                audio.play();
+            }
+        }
+
         const displayProgressSong = function () {
             audio.ontimeupdate = function () {
                 if (audio.currentTime) {
@@ -262,6 +269,7 @@ const app = {
 
             audio.addEventListener('play', playAudio)
             audio.addEventListener('pause', pauseAudio)
+            audio.addEventListener('pause', repeatAudio)
 
         }
 
