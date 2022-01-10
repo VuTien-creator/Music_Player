@@ -33,10 +33,13 @@ const btnPrev = $('.btn-prev');//button prev song
 
 const randomBtn = $('.btn-random'); //button random
 
+const repeatBtn = $('.btn-repeat');//button repeat
+
 const app = {
     currentIndex: 0,
     isPlaying: false,
     isRandom: false,
+    isRepeat: false,
     randomSongs: [],
     songs: [
         {
@@ -206,6 +209,12 @@ const app = {
             randomBtn.classList.toggle('active', app.isRandom);
         }
 
+        //xử lý hành động bấm nút repeat
+        const repeat = function () {
+            app.isRepeat = !app.isRepeat;
+            repeatBtn.classList.toggle('active', app.isRepeat);
+        }
+
         //xử lý sự kiện phóng to thu nhỏ hình cd
         document.addEventListener('scroll', displayCd);
 
@@ -250,6 +259,21 @@ const app = {
         {
             //khi mới vào người dùng không bấm nút play nhạc mà bấm next/prev thì thanh progress cũng phải thay đổi
             audio.addEventListener('playing',displayProgressSong)            
+        }
+        
+        //xử lý sự kiện click repeat
+        {
+            //xét active vào nút repeat và gán lại giá trị cho isRepeat
+            repeatBtn.addEventListener('click', repeat)
+
+            //nếu repeat thì cho loop, không thì thôi
+            repeatBtn.addEventListener('click', () => {
+                if (app.isRepeat) {
+                    audio.loop = true;
+                } else {
+                    audio.loop = false;
+                }
+            })
         }
     },
 
