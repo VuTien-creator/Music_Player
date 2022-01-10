@@ -173,14 +173,14 @@ const app = {
         }
 
         //khi đang có sự kiện play
-        audio.onplay = function () {
+        const playAudio = function () {
             player.classList.add('playing');
             app.isPlaying = true;
             cdThumbAnimate.play();//xoay cd thumb
         }
 
         //khi đang có sự kiện pause
-        audio.onpause = function () {
+        const pauseAudio = function () {
             player.classList.remove('playing');
             app.isPlaying = false;
             cdThumbAnimate.pause();//dừng xoay cd thumb
@@ -258,9 +258,13 @@ const app = {
         //xử lý audio
         {
             //khi mới vào người dùng không bấm nút play nhạc mà bấm next/prev thì thanh progress cũng phải thay đổi
-            audio.addEventListener('playing',displayProgressSong)            
+            audio.addEventListener('playing', displayProgressSong)
+
+            audio.addEventListener('play', playAudio)
+            audio.addEventListener('pause', pauseAudio)
+
         }
-        
+
         //xử lý sự kiện click repeat
         {
             //xét active vào nút repeat và gán lại giá trị cho isRepeat
