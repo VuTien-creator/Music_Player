@@ -196,7 +196,7 @@ const app = {
             cdThumbAnimate.pause();//dừng xoay cd thumb
         }
 
-        const repeatAudio = function () {
+        const autoNextSong = function () {
             if (!app.isRepeat) {
                 app.nextSong();
                 audio.play();
@@ -233,7 +233,7 @@ const app = {
         }
 
         //xử lý sự kiện phóng to thu nhỏ hình cd
-        document.addEventListener('scroll', app.displayCd);        
+        document.addEventListener('scroll', app.displayCd);
 
         //xử lý sự kiện click play hoặc pause 
         {
@@ -285,10 +285,10 @@ const app = {
 
             audio.addEventListener('play', playAudio)
             audio.addEventListener('pause', pauseAudio)
-            audio.addEventListener('ended',()=>{
+            audio.addEventListener('ended', () => {
                 app.scrollToActiveSong()
-                repeatAudio()
-            } )
+                autoNextSong()
+            })
 
         }
 
