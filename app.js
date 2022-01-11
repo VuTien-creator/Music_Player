@@ -136,26 +136,32 @@ const app = {
         $('.song.active').classList.remove('active');
         $(`#song_${index}`).classList.add('active');
     },
+    scrollToActiveSong: function () {
+        setTimeout(() => {
+            $('.song.active').scrollIntoView({
+                behavior: "smooth",
+                block: "end",
+            });
+        }, 100);
+    },
+    displayCd: function () {
+        //lấy vị trí của thẻ div chứa các bài hát khi mà người dùng scroll
+        //một số trình duyệt không hỗ trợ window.scrollY
+        //check coi 1 trong 2 cái nào có thì dùng
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+
+        const newCdWidth = cdWidth - scrollTop;
+        /**
+         * vì khi scroll nhanh sẽ khiến scrollTop lớn, làm giá trị px bị âm
+         * px âm không hợp lệ nên style.width sẽ lấy giá trị  trước khi bị âm
+         * nên đôi lúc cd không biến mất
+         */
+        cd.style.width = newCdWidth > 0 ? newCdWidth + 'px' : 0;
+
+        //opacity chạy từ 0 đến 1, và mờ dần theo tỉ lệ kích thước
+        cd.style.opacity = (newCdWidth / cdWidth);
+    },
     handleEvents: function () {
-
-        const displayCd = function () {
-            //lấy vị trí của thẻ div chứa các bài hát khi mà người dùng scroll
-            //một số trình duyệt không hỗ trợ window.scrollY
-            //check coi 1 trong 2 cái nào có thì dùng
-            const scrollTop = window.scrollY || document.documentElement.scrollTop;
-
-            const newCdWidth = cdWidth - scrollTop;
-            /**
-             * vì khi scroll nhanh sẽ khiến scrollTop lớn, làm giá trị px bị âm
-             * px âm không hợp lệ nên style.width sẽ lấy giá trị  trước khi bị âm
-             * nên đôi lúc cd không biến mất
-             */
-            cd.style.width = newCdWidth > 0 ? newCdWidth + 'px' : 0;
-
-            //opacity chạy từ 0 đến 1, và mờ dần theo tỉ lệ kích thước
-            cd.style.opacity = (newCdWidth / cdWidth);
-        }
-
         //xử lý xoay hình cdThumb
 
         // cdThumbAnimate đối tượng animate API
@@ -227,7 +233,7 @@ const app = {
         }
 
         //xử lý sự kiện phóng to thu nhỏ hình cd
-        document.addEventListener('scroll', displayCd);
+        document.addEventListener('scroll', app.displayCd);        
 
         //xử lý sự kiện click play hoặc pause 
         {
@@ -239,13 +245,19 @@ const app = {
 
         //xử lý sự kiện next  song
         {
-            btnNext.addEventListener('click', app.nextSong);
+            btnNext.addEventListener('click', () => {
+                app.nextSong();
+                app.scrollToActiveSong()
+            });
             btnNext.addEventListener('click', () => { audio.play() });
         }
 
         //xử lý sự kiện prev  song
         {
-            btnPrev.addEventListener('click', app.prevSong);
+            btnPrev.addEventListener('click', () => {
+                app.prevSong();
+                app.scrollToActiveSong()
+            });
 
             btnPrev.addEventListener('click', () => { audio.play() });
         }
@@ -273,7 +285,10 @@ const app = {
 
             audio.addEventListener('play', playAudio)
             audio.addEventListener('pause', pauseAudio)
-            audio.addEventListener('ended', repeatAudio)
+            audio.addEventListener('ended',()=>{
+                app.scrollToActiveSong()
+                repeatAudio()
+            } )
 
         }
 
@@ -299,9 +314,9 @@ const app = {
             app.currentIndex = 0;
         }
 
-        if(app.isRandom){
+        if (app.isRandom) {
             app.activeElementSong(app.randomSongs[app.currentIndex])
-        }else{
+        } else {
             app.activeElementSong(app.currentIndex);
         }
 
@@ -314,9 +329,9 @@ const app = {
             app.currentIndex = (app.songs.length - 1);
         }
 
-        if(app.isRandom){
+        if (app.isRandom) {
             app.activeElementSong(app.randomSongs[app.currentIndex])
-        }else{
+        } else {
             app.activeElementSong(app.currentIndex);
         }
         app.loadCurrentSong();
