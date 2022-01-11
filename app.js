@@ -35,6 +35,8 @@ const randomBtn = $('.btn-random'); //button random
 
 const repeatBtn = $('.btn-repeat');//button repeat
 
+const playlist = $('.playlist')// element playlist of songs
+
 const app = {
     currentIndex: 0,
     isPlaying: false,
@@ -130,7 +132,7 @@ const app = {
         </div>`;
         });
 
-        $('.playlist').innerHTML = htmls.join('');
+        playlist.innerHTML = htmls.join('');
     },
     activeElementSong: function (index) {
         $('.song.active').classList.remove('active');
@@ -232,6 +234,48 @@ const app = {
             repeatBtn.classList.toggle('active', app.isRepeat);
         }
 
+        //khi click chuột để chọn bài hát
+        const clickMucsic = function (e) {
+            //nếu không phải click vào bài hát thì không làm gì
+            if (!e.target.closest('.song')) {
+                return;
+            }
+
+            //nếu chọn nút option thì xử lý option
+            if (e.target.closest('.option')) {
+                console.log('option')
+            } else {
+
+                //nếu chọn vào bài hát đang được phát nhưng bị pause thì tiếp tục phát
+                if (e.target.closest('.song.active') && !app.isPlaying) {
+                    playOrPause()
+                    displayProgressSong()
+                }
+
+                // nếu chọn vào bài hát khác với bài hát đang phát
+                if (e.target.closest('.song:not(.active)')) {
+                    //lấy ra id của bài hát đang chọn (do id có chứa index bài hát nằm trong app.songs)
+                    const elementId = e.target.closest('.song').getAttribute('id');
+
+                    //xử lý id của bài hát đang chọn để lấy ra index
+                    let indexOfSong = elementId.slice(elementId.indexOf('_') + 1);
+                    indexOfSong = parseInt(indexOfSong)//gán lại thành số (vì gán lại nên mới đặt biến là let)
+
+                    app.currentIndex = indexOfSong; //gán cho currentIndex bằng với index của bài hát
+                    if (app.isRandom) {
+                        //nếu đang random thì phải tìm xem indexOfSong là nằm vị trí bao nhiêu của randomSongs để
+                        // gán lại cho currentIndex (để đúng với logic của chức năng random đã làm ở trên)
+                        app.currentIndex = app.randomSongs.indexOf(indexOfSong)
+                    }
+                    //load lại bài hát được chọn
+                    app.loadCurrentSong();
+                    app.activeElementSong(indexOfSong) //highlight bài hát được chọn lên
+                    app.scrollToActiveSong()
+                    audio.play()
+                }
+            }
+        }
+
         //xử lý sự kiện phóng to thu nhỏ hình cd
         document.addEventListener('scroll', app.displayCd);
 
@@ -305,6 +349,11 @@ const app = {
                     audio.loop = false;
                 }
             })
+        }
+
+        //xử lý sự kiện click vào bài hát
+        {
+            playlist.addEventListener('click', clickMucsic)
         }
     },
 
