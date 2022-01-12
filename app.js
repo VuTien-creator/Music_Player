@@ -9,6 +9,7 @@
  * 8 Active song
  * 9 Scroll active song into view
  * 10 play song when click
+ * 11 save the chosen in the last visit
  */
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
@@ -29,7 +30,7 @@ const audio = $('#audio');//thẻ audio
 const playBtn = $('.btn-toggle-play');//button play hoặc pause
 const player = $('.player');// hiển thị play hoặc pause
 
-const progress = $('#progress');
+const progress = $('#progress');//thanh hiển thị thời gian bài hát
 
 const btnNext = $('.btn-next');//button next song
 const btnPrev = $('.btn-prev');//button prev song
@@ -175,7 +176,7 @@ const app = {
         localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config))//lưu vào localstorage 
     },
     loadConfig: function () {
-        //kiểm tra các giá trị trong localstorage, nếu có thì gán lại cho các giá trị trong app
+        //kiểm tra giá trị curentIndex trong localstorage, nếu đúng thì gán lại app.currentIndex
         if (this.config.currentIndex && this.songs[this.config.currentIndex] ) {
             this.currentIndex = this.config.currentIndex
         }
@@ -188,18 +189,17 @@ const app = {
 
                 //nếu index trong mảng này không khớp với bài hát nào trong danh sách bài hát thì bỏ cái index đó đi
                 if(this.songs[index]){
-                    console.log(index)
                     randomSongs.push(index)
                 }
             })
             this.isRandom = this.config.isRandom
             this.randomSongs = randomSongs
         }
-        
+
         if (this.config.isRepeat) {
             this.isRepeat = this.config.isRepeat
         }
-        //kích hoạt các button nếu ở lần sử dụng trước đó có bật mà không tắt
+        //kích hoạt các button dựa vào trạng thái đã chọn ở lần trước
         randomBtn.classList.toggle('active', app.isRandom);
         repeatBtn.classList.toggle('active', app.isRepeat);
     },
