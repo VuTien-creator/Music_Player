@@ -13,6 +13,9 @@
 const $ = document.querySelector.bind(document);
 const $$ = document.querySelectorAll.bind(document);
 
+//constant key name of storage
+const PLAYER_STORAGE_KEY = 'PLAYER'
+
 //lấy ra thẻ div show ra cái hình cd
 const cd = $('.cd');
 
@@ -42,6 +45,7 @@ const app = {
     isPlaying: false,
     isRandom: false,
     isRepeat: false,
+    config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},//lấy từ localStorage ra các giá trị đã lưu, nếu không có thì là {}
     randomSongs: [],
     songs: [
         {
@@ -108,6 +112,9 @@ const app = {
         Object.defineProperty(this, 'currentSong', {
             //function get này sẽ trả về bài hát hiện tại đang phát, mặc định là bài đầu
             get: function () {
+                //gán localStorage vị trí index của bài hát hiện tại (trong trường hợp nếu random thì vị trí của bài hát 
+                // hiện tại luôn luôn nằm tại index đúng với currentIndex của mảng randomSongs do đã sử lý từ các tính năng trước)
+                app.setConfig('currentIndex', this.currentIndex)
                 if (this.isRandom) {
                     return this.songs[this.randomSongs[this.currentIndex]];
                 }
@@ -162,6 +169,39 @@ const app = {
 
         //opacity chạy từ 0 đến 1, và mờ dần theo tỉ lệ kích thước
         cd.style.opacity = (newCdWidth / cdWidth);
+    },
+    setConfig: function (key, value) {
+        this.config[key] = value;
+        localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config))//lưu vào localstorage 
+    },
+    loadConfig: function () {
+        //kiểm tra các giá trị trong localstorage, nếu có thì gán lại cho các giá trị trong app
+        if (this.config.currentIndex && this.songs[this.config.currentIndex] ) {
+            this.currentIndex = this.config.currentIndex
+        }
+
+        if (this.config.isRandom) {
+
+            const randomSongs = []
+            //lặp qua mảng random songs trong localStorage
+            this.config.randomSongs.forEach((index) => {
+
+                //nếu index trong mảng này không khớp với bài hát nào trong danh sách bài hát thì bỏ cái index đó đi
+                if(this.songs[index]){
+                    console.log(index)
+                    randomSongs.push(index)
+                }
+            })
+            this.isRandom = this.config.isRandom
+            this.randomSongs = randomSongs
+        }
+        
+        if (this.config.isRepeat) {
+            this.isRepeat = this.config.isRepeat
+        }
+        //kích hoạt các button nếu ở lần sử dụng trước đó có bật mà không tắt
+        randomBtn.classList.toggle('active', app.isRandom);
+        repeatBtn.classList.toggle('active', app.isRepeat);
     },
     handleEvents: function () {
         //xử lý xoay hình cdThumb
@@ -315,10 +355,12 @@ const app = {
                 if (app.isRandom) {
                     //gán lại mảng randomSongs khi người dùng click random để tạo 1 list random mới
                     app.setPlayListRanDom();
+                    app.setConfig('randomSongs', app.randomSongs) //lưu vào localStorage mảng randomSongs mới random được
                 } else {
                     //khi tắt random thì gán lại currentIndex bằng với giá trị index thực của bài hát đang hát bên trong app.songs
                     app.currentIndex = app.randomSongs[app.currentIndex];
                 }
+                app.setConfig('isRandom', app.isRandom);//gán lại cho localStorage isRandom
             });
         }
 
@@ -348,6 +390,7 @@ const app = {
                 } else {
                     audio.loop = false;
                 }
+                app.setConfig('isRepeat', app.isRepeat); //gán lại cho isRepeat trong localStorage
             })
         }
 
@@ -417,6 +460,9 @@ const app = {
 
     },
     start: function () {
+        //load localStorage trước bất kì các tính năng nào để gán giá trị cho các thuộc tính nếu có trong localStorage
+        this.loadConfig()
+
         //định nghĩa các thuộc tính cho object
         this.defineProperties();
 
